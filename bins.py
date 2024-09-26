@@ -1,5 +1,5 @@
 from lib import *
-import random,math
+import random
 
 the = o(buckets = 8,
         seed    = 1234567891,
@@ -7,26 +7,18 @@ the = o(buckets = 8,
 
 def bins(data):
   for col in data.cols.x:
-    if col.this is NUM:
-      for row in data.rows:
-        row[col.at] = bin(col,row[col.at])
+    for row in data.rows:
+      row[col.at] = col.bin(row[col.at], the.buckets)
 
-def bin(col,x): 
-    return x if x=="?" else int(cdf(col,x) * the.buckets + 0.5)
+def headers(data):
+  names = data.cols.names[:]
+  for col in data.cols.x:
+    names[col.at] = names[col.at].lower()
+  return names 
 
-def cdf(col,x):
-  fun = lambda x: 1 - 0.5 * math.exp(-0.717*x - 0.416*x*x) 
-  z   = (x - col.mu) / col.sd
-  return  fun(x) if z>=0 else 1 - fun(-z) 
-
+cli(the.__dict__)
 random.seed(the.seed)
-if __name__ == "__main__": 
-  cli(the.__dict__)
-  random.seed(the.seed)
-  data = adds( DATA(), csv(the.train))
-  bins(data)
-  #random.shuffle(data.rows)
-  [print(','.join([str(x) for x in row])) for row in [data.cols.names] + data.rows]
-
-
-
+data =  DATA().adds(csv(the.train)).sort()
+bins(data)
+random.shuffle(data.rows)
+[print(','.join([str(x) for x in row])) for row in [headers(data)] + data.rows]
